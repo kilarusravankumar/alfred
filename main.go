@@ -9,9 +9,10 @@ import (
 	"github.com/fsnotify/fsnotify"
 ) 
 
-
 func main(){
-    fmt.Println("Alfred will watchover your diretory and run go build after an file write event.")
+    logger = InitLogger()
+    logger.Info("Alfred 0.2 will watchover your diretory and run go build after an file write event.")
+    
     watcher, err := fsnotify.NewWatcher()
     if err != nil {
         panic(err)
@@ -24,13 +25,12 @@ func main(){
                     if !ok {
                         return 
                     }
-                    fmt.Println("triggered event: ", event)
-                    if event.Has(fsnotify.Write){
-                        if isNotGitAndExeFile(event.Name) {
-                            runBuildCommand()
-                            fmt.Printf("%s file is modified", event.Name)
+                    logger.Debug("triggered event: "+ event.Name)
+                    logger.Debug(fmt.Sprintf("%v is a go file", isNotGitAndExeFile(event.Name)))
+                    if isNotGitAndExeFile(event.Name) {
+                        runBuildCommand()
+                        logger.Debug(fmt.Sprintf("%s file is modified", event.Name))
 
-                        }
                     }
                 case err, ok := <- watcher.Events:
                     if !ok {
@@ -43,7 +43,7 @@ func main(){
     }()
    
     if err := watcher.Add(getCurrentDirectory()); err != nil {
-        fmt.Println(err.Error())
+        logger.Error(err.Error())
     }
 
     <- make(chan struct{})
@@ -52,7 +52,7 @@ func main(){
 
 
 func runBuildCommand(){
-    fmt.Println("Building go application.")
+    logger.Info("Building go application.")
     cmd := exec.Command("go","build")
     if err := cmd.Run(); err != nil {
         fmt.Println(err.Error())
@@ -68,7 +68,7 @@ func getCurrentDirectory() string {
 }
 
 func isNotGitAndExeFile(filename string) bool{
-    if strings.Contains(filename, ".git") && strings.Contains(filename, ".exe"){
+    if strings.Contains(filename, ".git") || strings.Contains(filename, ".exe"){
         return false
     }
    return true 
