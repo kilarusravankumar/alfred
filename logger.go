@@ -18,7 +18,7 @@ func InitLogger() *zap.Logger {
     atmoicLevel.SetLevel(zapcore.InfoLevel)
     
     logger =  zap.New(zapcore.NewCore(
-        zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig()),
+        zapcore.NewConsoleEncoder(zap.NewProductionEncoderConfig()),
         zapcore.Lock(os.Stdout),
         atmoicLevel,
 

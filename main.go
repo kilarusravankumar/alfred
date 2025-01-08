@@ -11,7 +11,7 @@ import (
 
 func main(){
     logger = InitLogger()
-    logger.Info("Alfred 0.2 will watchover your diretory and run go build after an file write event.")
+    logger.Info("Alfred 0.2.1 will watchover your diretory and run go build automatically")
     
     watcher, err := fsnotify.NewWatcher()
     if err != nil {
@@ -32,11 +32,11 @@ func main(){
                         logger.Debug(fmt.Sprintf("%s file is modified", event.Name))
 
                     }
-                case err, ok := <- watcher.Events:
+                case eventErr, ok := <- watcher.Errors:
                     if !ok {
                         return
                     }
-                    fmt.Println(err)
+                    logger.Error(eventErr.Error())
            } 
         } 
 
