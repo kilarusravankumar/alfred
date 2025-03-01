@@ -8,6 +8,8 @@ import (
 type Config struct {
 	BuildName    string `json:"build_name"`
 	BuildVersion string `json:"build_version"`
+    BuildCommand string `json:"build_command"`
+    WatchFiles []string `json:"watch_files"`
 }
 
 func ParseConfig() Config {

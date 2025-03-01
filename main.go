@@ -26,8 +26,8 @@ func main() {
 					return
 				}
 				logger.Debug("triggered event: " + event.Name)
-				logger.Debug(fmt.Sprintf("%v is a go file", isNotGitAndExeFile(event.Name)))
-				if isNotGitAndExeFile(event.Name) {
+				logger.Debug(fmt.Sprintf("%v is a go file", isWatchedFile(event.Name, config)))
+				if isWatchedFile(event.Name, config) {
 					runBuildCommand(config)
 					logger.Debug(fmt.Sprintf("%s file is modified", event.Name))
 
@@ -53,10 +53,11 @@ func main() {
 func runBuildCommand(config Config) {
 	logger.Info("Building go application.")
 	var cmd *exec.Cmd
+    commandPath := strings.Split(config.BuildCommand," ")
 	if config.BuildName == "" {
-		cmd = exec.Command("go", "build")
+        cmd = exec.Command(commandPath[0],commandPath[1:]...)
 	} else {
-		cmd = exec.Command("go", "build", "-o", config.BuildName)
+        cmd = exec.Command(commandPath[0],commandPath[1:]...)
 	}
 	if err := cmd.Run(); err != nil {
 		fmt.Println(err.Error())
@@ -71,9 +72,12 @@ func getCurrentDirectory() string {
 	return dir
 }
 
-func isNotGitAndExeFile(filename string) bool {
-	if strings.Contains(filename, ".git") || strings.Contains(filename, ".exe") {
-		return false
-	}
-	return true
+func isWatchedFile(filename string, config Config) bool {
+    isWatched := false
+    for _, ext := range config.WatchFiles {
+        if strings.Contains(filename, ext) {
+            isWatched = true
+        }
+    }
+	return isWatched 
 }
